@@ -1,5 +1,8 @@
 # pico-event-shim-kafka
 [![CircleCI](https://circleci.com/gh/pico-works/pico-event-shim-kafka/tree/develop.svg?style=svg)](https://circleci.com/gh/pico-works/pico-event-shim-kafka/tree/develop)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3d50672cea654397acff48f47f438074)](https://www.codacy.com/app/newhoggy/newhoggy-pico-event-kafka?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=newhoggy/pico-event-kafka&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/3d50672cea654397acff48f47f438074)](https://www.codacy.com/app/newhoggy/newhoggy-pico-event-kafka?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=newhoggy/pico-event-kafka&amp;utm_campaign=Badge_Coverage)
+[![Gitter chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/pico-works/general)
 
 `pico-event` shim library for kafka.
 
