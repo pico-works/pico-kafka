@@ -6,19 +6,19 @@ import java.util.{Properties, Collection => JCollection}
 
 import org.apache.kafka.clients.consumer.{ConsumerRebalanceListener, ConsumerRecord, ConsumerRecords, KafkaConsumer}
 import org.apache.kafka.common.TopicPartition
-import org.pico.disposal.Disposer
+import org.pico.disposal.{Disposer, SimpleDisposer}
 import org.pico.disposal.std.autoCloseable._
 import org.pico.event.kafka.internal.syntax.list._
-import org.pico.event.{Bus, Live, Source, Var}
+import org.pico.event.{Bus, Cell, Source, View}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
 
-class KafkaEventConsumer(properties: Properties) extends Disposer {
+class KafkaEventConsumer(properties: Properties) extends SimpleDisposer {
   private val consumer = new KafkaConsumer[Array[Byte], Array[Byte]](properties)
   private val rebalanceBus = Bus[Rebalance]
   private val consumerRecordsBus = Bus[Record[Array[Byte], Array[Byte]]]
-  private val topicsRef = Var(List.empty[String])
+  private val topicsRef = Cell(List.empty[String])
 
   private val rebalanceListener = new ConsumerRebalanceListener {
     override def onPartitionsAssigned(partitions: JCollection[TopicPartition]): Unit = {
@@ -32,7 +32,7 @@ class KafkaEventConsumer(properties: Properties) extends Disposer {
 
   def rebalanceSource: Source[Rebalance] = rebalanceBus
   def consumerRecordsSource: Source[Record[Array[Byte], Array[Byte]]] = consumerRecordsBus
-  def topics: Live[List[String]] = topicsRef
+  def topics: View[List[String]] = topicsRef
 
   this.disposes(topicsRef.source.subscribe { topics =>
     consumer.subscribe(topicsRef.value.asJava, rebalanceListener)
@@ -48,7 +48,7 @@ class KafkaEventConsumer(properties: Properties) extends Disposer {
   }
 
   def run(timeout: Duration): Closeable = {
-    val thread = new Thread with Disposer {
+    val thread = new Thread with SimpleDisposer {
       val running = this.resets(false, new AtomicBoolean(true))
 
       override def run(): Unit = {

@@ -9,9 +9,9 @@ import kafka.common.TopicExistsException
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.{ZkClient, ZkConnection}
 import org.pico.disposal.std.autoCloseable._
-import org.pico.disposal.{Disposer, OnClose}
+import org.pico.disposal.{Disposer, OnClose, SimpleDisposer}
 
-class KafkaAdmin(zookeeperConnect: String) extends Disposer {
+class KafkaAdmin(zookeeperConnect: String) extends SimpleDisposer {
   val sessionTimeoutMs = 10 * 1000
   val connectionTimeoutMs = 8 * 1000
   val zkClient = this.disposesOrClose(new ZkClient(zookeeperConnect, sessionTimeoutMs, connectionTimeoutMs, ZKStringSerializer) with Closeable)
