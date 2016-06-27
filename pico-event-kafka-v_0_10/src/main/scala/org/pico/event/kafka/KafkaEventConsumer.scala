@@ -32,13 +32,13 @@ class KafkaEventConsumer(properties: Properties) extends SimpleDisposer {
 
   def rebalanceSource: Source[Rebalance] = rebalanceBus
   def consumerRecordsSource: Source[Record[Array[Byte], Array[Byte]]] = consumerRecordsBus
-  def topics: View[List[String]] = topicsRef
+  def sourceForTopics: View[List[String]] = topicsRef
 
   this.disposes(topicsRef.source.subscribe { topics =>
     consumer.subscribe(topicsRef.value.asJava, rebalanceListener)
   })
 
-  def topics(topics: String*): Source[Record[Array[Byte], Array[Byte]]] = {
+  def sourceForTopics(topics: String*): Source[Record[Array[Byte], Array[Byte]]] = {
     val source = consumerRecordsBus.filter(r => topics.contains(r.topic))
     topicsRef.update(ts => (ts /: topics) { case (us, u) => u :: us })
     source.onClose(topicsRef.update(ts => (ts /: topics) { case (existingTopics, topic) =>
@@ -70,6 +70,8 @@ class KafkaEventConsumer(properties: Properties) extends SimpleDisposer {
           }
         }
       }
+
+      this.onClose(this.interrupt())
     }
 
     thread.setDaemon(true)

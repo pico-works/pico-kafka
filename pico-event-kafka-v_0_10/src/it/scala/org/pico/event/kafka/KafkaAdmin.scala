@@ -9,7 +9,7 @@ import kafka.common.TopicExistsException
 import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.{ZkClient, ZkConnection}
 import org.pico.disposal.std.autoCloseable._
-import org.pico.disposal.{Disposer, OnClose, SimpleDisposer}
+import org.pico.disposal.{OnClose, SimpleDisposer}
 
 class KafkaAdmin(zookeeperConnect: String) extends SimpleDisposer {
   val sessionTimeoutMs = 10 * 1000
@@ -23,6 +23,7 @@ class KafkaAdmin(zookeeperConnect: String) extends SimpleDisposer {
       replicationFactor: Int,
       topicConfig: Properties = new Properties,
       rackAwareMode: RackAwareMode = RackAwareMode.Enforced): Unit = {
+    AdminUtils.createTopic(zkUtils, topic, partitions, replicationFactor, topicConfig, rackAwareMode)
   }
 
   def forceCreateTopic(
