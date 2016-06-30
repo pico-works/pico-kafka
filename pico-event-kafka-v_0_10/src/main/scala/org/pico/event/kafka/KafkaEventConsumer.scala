@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.{Properties, Collection => JCollection}
 
 import org.apache.kafka.clients.consumer.{ConsumerRebalanceListener, ConsumerRecord, ConsumerRecords, KafkaConsumer}
-import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.{Metric, MetricName, TopicPartition}
 import org.pico.disposal.{Disposer, SimpleDisposer}
 import org.pico.disposal.std.autoCloseable._
 import org.pico.event.kafka.internal.syntax.list._
@@ -30,6 +30,7 @@ class KafkaEventConsumer(properties: Properties) extends SimpleDisposer {
     }
   }
 
+  def metrics: Map[MetricName, Metric] = consumer.metrics().asScala.toMap
   def rebalanceSource: Source[Rebalance] = rebalanceBus
   def consumerRecordsSource: Source[Record[Array[Byte], Array[Byte]]] = consumerRecordsBus
   def sourceForTopics: View[List[String]] = topicsRef
@@ -53,7 +54,9 @@ class KafkaEventConsumer(properties: Properties) extends SimpleDisposer {
 
       override def run(): Unit = {
         while (running.get()) {
-          consumer.poll(timeout.toMillis).asScala.foreach { kafkaRecord =>
+          val records: ConsumerRecords[Array[Byte], Array[Byte]] = consumer.poll(timeout.toMillis)
+
+          records.asScala.foreach { kafkaRecord =>
             val record = Record(
                 topic               = kafkaRecord.topic,
                 partition           = kafkaRecord.partition,

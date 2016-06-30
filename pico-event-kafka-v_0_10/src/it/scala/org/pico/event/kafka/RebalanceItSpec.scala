@@ -78,6 +78,13 @@ class RebalanceItSpec extends Specification {
           Thread.sleep(1000)
         }
 
+        consumers.foreach { consumer =>
+          println("==========")
+          consumer.metrics.foreach { case (k, v) =>
+            println(s"==> $k, $v")
+          }
+        }
+
 
         success
       }
