@@ -2,9 +2,9 @@ import sbt.Keys._
 import sbt._
 
 object Build extends sbt.Build {  
+  val pico_disposal             = "org.pico"          %%  "pico-disposal"             % "0.6.2"
   val pico_event                = "org.pico"          %%  "pico-event"                % "0.2.0"
-  val kafka_clients_0_9         = "org.apache.kafka"  %   "kafka-clients"             % "0.9.0.1"
-  val kafka_clients_0_10        = "org.apache.kafka"  %   "kafka-clients"             % "0.10.0.0"
+  val kafka_clients             = "org.apache.kafka"  %   "kafka-clients"             % "0.10.0.0"
   val kafka_server              = "org.apache.kafka"  %%  "kafka"                     % "0.10.0.0"
   val log4j                     = "log4j"             %   "log4j"                     % "1.2.17"
 
@@ -34,25 +34,18 @@ object Build extends sbt.Build {
       .standard("Fake project").notPublished
       .testLibs(specs2_core)
 
+  lazy val `pico-disposal-kafka` = Project(id = "pico-disposal-kafka", base = file("pico-disposal-kafka"))
+      .standard("kafka support for pico-disposal")
+      .libs(pico_disposal, kafka_clients)
+      .testLibs(specs2_core)
+
   lazy val `pico-event-kafka` = Project(id = "pico-event-kafka", base = file("pico-event-kafka"))
       .standard("pico-event shim library for kafka")
-      .libs(pico_event)
+      .dependsOn(`pico-disposal-kafka`)
+      .libs(pico_event, kafka_clients)
       .testLibs(specs2_core)
 
-  lazy val `pico-event-kafka-v_0_9` = Project(id = "pico-event-kafka-v_0_9", base = file("pico-event-kafka-v_0_9"))
-      .standard("pico-event shim library for kafka")
-      .libs(pico_event, kafka_clients_0_9)
-      .dependsOn(`pico-event-kafka`)
-      .testLibs(specs2_core)
-
-  lazy val `pico-event-kafka-v_0_10` = Project(id = "pico-event-kafka-v_0_10", base = file("pico-event-kafka-v_0_10"))
-      .standard("pico-event shim library for kafka")
-      .libs(pico_event, kafka_clients_0_10)
-      .dependsOn(`pico-event-kafka`)
-      .testLibs(specs2_core)
-      .it.itLibs(kafka_server, log4j)
-
-  lazy val all = Project(id = "pico-event-kafka-project", base = file("."))
+  lazy val all = Project(id = "pico-kafka-project", base = file("."))
       .notPublished
-      .aggregate(`pico-event-kafka`, `pico-event-kafka-v_0_10`, `pico-event-kafka-v_0_9`, `pico-fake`)
+      .aggregate(`pico-disposal-kafka`, `pico-event-kafka`, `pico-fake`)
 }
