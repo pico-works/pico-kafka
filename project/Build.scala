@@ -2,8 +2,7 @@ import sbt.Keys._
 import sbt._
 
 object Build extends sbt.Build {  
-  val pico_disposal             = "org.pico"          %%  "pico-disposal"             % "0.6.2"
-  val pico_event                = "org.pico"          %%  "pico-event"                % "0.2.0"
+  val pico_event                = "org.pico"          %%  "pico-event"                % "0.2.1-27-b6d6e02"
   val kafka_clients             = "org.apache.kafka"  %   "kafka-clients"             % "0.10.0.0"
   val kafka_server              = "org.apache.kafka"  %%  "kafka"                     % "0.10.0.0"
   val log4j                     = "log4j"             %   "log4j"                     % "1.2.17"
@@ -34,18 +33,13 @@ object Build extends sbt.Build {
       .standard("Fake project").notPublished
       .testLibs(specs2_core)
 
-  lazy val `pico-disposal-kafka` = Project(id = "pico-disposal-kafka", base = file("pico-disposal-kafka"))
-      .standard("kafka support for pico-disposal")
-      .libs(pico_disposal, kafka_clients)
-      .testLibs(specs2_core)
-
-  lazy val `pico-event-kafka` = Project(id = "pico-event-kafka", base = file("pico-event-kafka"))
-      .standard("pico-event shim library for kafka")
-      .dependsOn(`pico-disposal-kafka`)
+  lazy val `pico-kafka` = Project(id = "pico-kafka", base = file("pico-kafka"))
+      .standard("shim library for kafka")
       .libs(pico_event, kafka_clients)
+      .it.itLibs(kafka_server)
       .testLibs(specs2_core)
 
   lazy val all = Project(id = "pico-kafka-project", base = file("."))
       .notPublished
-      .aggregate(`pico-disposal-kafka`, `pico-event-kafka`, `pico-fake`)
+      .aggregate(`pico-kafka`, `pico-fake`)
 }
